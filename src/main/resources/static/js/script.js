@@ -31,15 +31,16 @@ if (menuToggle && globalNav) {
 const reservationForm = document.querySelector("#reservation-form");
 
 if (reservationForm) {
-  const fieldIds = [
-    "guest-name",
-    "guest-email",
-    "guest-phone",
-    "checkin",
-    "checkout",
-    "room-choice",
-    "plan-choice"
-  ];
+	const fieldIds = [
+	  "guest-name",
+	  "guest-email",
+	  "guest-phone",
+	  "guest-address",
+	  "checkin",
+	  "checkout",
+	  "room-choice",
+	  "plan-choice"
+	];
 
   const requests = document.querySelector("#requests");
   const count = document.querySelector("#requests-count");
@@ -86,6 +87,7 @@ if (reservationForm) {
     const name = document.getElementById("guest-name").value.trim();
     const email = document.getElementById("guest-email").value.trim();
     const phone = document.getElementById("guest-phone").value.trim();
+	const address = document.getElementById("guest-address").value.trim();
     const checkin = document.getElementById("checkin").value;
     const checkout = document.getElementById("checkout").value;
     const room = document.getElementById("room-choice").value;
@@ -114,6 +116,13 @@ if (reservationForm) {
         );
       }
     }
+	
+	// 住所の入力チェック
+	if (!address) {
+
+	  setError("guest-address", "住所を入力してください。");
+
+	}
 
     if (!checkin) {
       setError("checkin", "チェックイン日を選択してください。");

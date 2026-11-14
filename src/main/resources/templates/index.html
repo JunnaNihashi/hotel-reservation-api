@@ -380,6 +380,25 @@
           <p class="field-error" id="guest-phone-error"></p>
 
         </div>
+		
+		<div class="form-field">
+
+		  <label for="guest-address">
+		    ご住所 <span class="required-mark">*</span>
+		  </label>
+
+		  <input
+		    id="guest-address"
+		    name="address"
+		    type="text"
+		    autocomplete="street-address"
+		    required
+		    placeholder="住所を入力してください"
+		  >
+
+		  <p class="field-error" id="guest-address-error"></p>
+
+		</div>
 
         <div class="form-dates">
 
@@ -411,7 +430,7 @@
 
 
 
-		  <select id="room-choice" name="room" required>
+		  <select id="room-choice" name="roomTypeId" required>
 
 		    <option value="">選択してください</option>
 
@@ -460,6 +479,24 @@
 
 
 		  <p class="field-error" id="plan-choice-error"></p>
+
+		</div>
+		
+		<div class="form-field">
+
+		  <label for="number-of-guests">
+		    宿泊人数 <span class="required-mark">*</span>
+		  </label>
+
+		  <select id="number-of-guests" name="numberOfGuests" required>
+		    <option value="">選択してください</option>
+		    <option value="1">1名</option>
+		    <option value="2">2名</option>
+		    <option value="3">3名</option>
+		    <option value="4">4名</option>
+		  </select>
+
+		  <p class="field-error" id="number-of-guests-error"></p>
 
 		</div>
 

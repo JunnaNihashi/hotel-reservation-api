@@ -27,9 +27,10 @@ public class ReservationController {
 		System.out.println("お名前:" + form.getGuestName());
 		System.out.println("メール：" + form.getEmail());
         System.out.println("電話番号：" + form.getPhone());
+        System.out.println("住所：" + form.getAddress());
         System.out.println("チェックイン日：" + form.getCheckin());
         System.out.println("チェックアウト日：" + form.getCheckout());
-        System.out.println("お部屋ID：" + form.getRoom());
+        System.out.println("お部屋ID：" + form.getRoomTypeId());
         System.out.println("宿泊プランID：" + form.getPlan());
         System.out.println("ご要望：" + form.getRequests());
 

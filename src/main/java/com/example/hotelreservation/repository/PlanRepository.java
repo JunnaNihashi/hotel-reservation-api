@@ -1,9 +1,10 @@
-package com.example.hotelreservation.repository;
+
+package com.example.hotelreservation.repository; 
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.hotelreservation.entity.Plan;
+import com.example.hotelreservation.entity.Plan; 
 
-public interface PlanRepository extends JpaRepository<Plan, Integer> {
+public interface PlanRepository extends JpaRepository<Plan, Integer> { 
 
 }

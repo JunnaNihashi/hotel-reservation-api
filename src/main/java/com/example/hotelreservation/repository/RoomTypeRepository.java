@@ -1,11 +1,10 @@
-package com.example.hotelreservation.repository;
+
+package com.example.hotelreservation.repository; 
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.hotelreservation.entity.RoomType;
+import com.example.hotelreservation.entity.RoomType; 
 
-
-public interface RoomTypeRepository 
-	extends JpaRepository<RoomType, Integer> {
-
+public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> { 
+	
 }

@@ -1,21 +1,23 @@
 
+```javascript
 // モバイル用ナビゲーションの開閉
 const menuToggle = document.querySelector(".menu-toggle");
 const globalNav = document.querySelector(".global-nav");
 
 if (menuToggle && globalNav) {
   menuToggle.addEventListener("click", () => {
-    const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
+    const isExpanded =
+      menuToggle.getAttribute("aria-expanded") === "true";
 
     menuToggle.setAttribute("aria-expanded", String(!isExpanded));
     menuToggle.setAttribute(
       "aria-label",
       isExpanded ? "メニューを開く" : "メニューを閉じる"
     );
+
     globalNav.classList.toggle("is-open", !isExpanded);
   });
 
-  // メニュー内のリンクを押したらナビゲーションを閉じる
   globalNav.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       menuToggle.setAttribute("aria-expanded", "false");
@@ -25,142 +27,141 @@ if (menuToggle && globalNav) {
   });
 }
 
-
-// 予約フォームの入力チェック（デモ用：サーバー送信は行いません）
+// 予約フォームの入力チェック
 const reservationForm = document.querySelector("#reservation-form");
+
 if (reservationForm) {
-  const fieldIds = ["guest-name", "guest-email", "guest-phone", "checkin", "checkout", "room-choice"];
+  const fieldIds = [
+    "guest-name",
+    "guest-email",
+    "guest-phone",
+    "checkin",
+    "checkout",
+    "room-choice",
+    "plan-choice"
+  ];
+
   const requests = document.querySelector("#requests");
   const count = document.querySelector("#requests-count");
   const feedback = document.querySelector("#form-feedback");
-  requests.addEventListener("input", () => { count.textContent = requests.value.length; });
 
+  // ご要望の文字数表示
+  if (requests && count) {
+    requests.addEventListener("input", () => {
+      count.textContent = requests.value.length;
+    });
+  }
+
+  // エラーメッセージの表示
   function setError(id, message) {
     const input = document.getElementById(id);
-    document.getElementById(id + "-error").textContent = message;
-    if (message) input.setAttribute("aria-invalid", "true");
-    else input.removeAttribute("aria-invalid");
+    const error = document.getElementById(id + "-error");
+
+    if (!input || !error) return;
+
+    error.textContent = message;
+
+    if (message) {
+      input.setAttribute("aria-invalid", "true");
+    } else {
+      input.removeAttribute("aria-invalid");
+    }
   }
-  fieldIds.forEach(id => {
-    document.getElementById(id).addEventListener("input", () => setError(id, ""));
-    document.getElementById(id).addEventListener("change", () => setError(id, ""));
+
+  // 入力内容が変更されたらエラーを解除
+  fieldIds.forEach((id) => {
+    const input = document.getElementById(id);
+
+    if (!input) return;
+
+    input.addEventListener("input", () => setError(id, ""));
+    input.addEventListener("change", () => setError(id, ""));
   });
 
+  // 予約フォーム送信時の処理
   reservationForm.addEventListener("submit", (event) => {
-    event.preventDefault();
     feedback.textContent = "";
-    fieldIds.forEach(id => setError(id, ""));
+    fieldIds.forEach((id) => setError(id, ""));
+
     const name = document.getElementById("guest-name").value.trim();
     const email = document.getElementById("guest-email").value.trim();
     const phone = document.getElementById("guest-phone").value.trim();
     const checkin = document.getElementById("checkin").value;
     const checkout = document.getElementById("checkout").value;
     const room = document.getElementById("room-choice").value;
-    if (!name) setError("guest-name", "お名前を入力してください。");
-    if (!email) setError("guest-email", "メールアドレスを入力してください。");
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setError("guest-email", "正しいメールアドレスを入力してください。");
-    if (!phone) setError("guest-phone", "電話番号を入力してください。");
-    else if (!/^[0-9-]+$/.test(phone) || !/^(?:0\d{9,10}|0\d{1,4}-\d{1,4}-\d{3,4})$/.test(phone) || ![10, 11].includes(phone.replace(/-/g, "").length)) setError("guest-phone", "電話番号は数字とハイフンで10〜11桁の形式で入力してください。");
-    if (!checkin) setError("checkin", "チェックイン日を選択してください。");
-    if (!checkout) setError("checkout", "チェックアウト日を選択してください。");
-    else if (checkin && checkout <= checkin) setError("checkout", "チェックアウト日はチェックイン日より後の日付にしてください。");
-    if (!room) setError("room-choice", "お部屋を選択してください。");
-    if (requests.value.length > 500) {
-      feedback.textContent = "ご要望は500文字以内で入力してください。";
+    const plan = document.getElementById("plan-choice").value;
+
+    if (!name) {
+      setError("guest-name", "お名前を入力してください。");
     }
-    // 開発者ツールのConsoleに入力値と判定結果を順番に表示
-    console.group("予約フォームの入力チェック");
-    const fields = [
-      ["お名前", "guest-name", name],
-      ["メールアドレス", "guest-email", email],
-      ["電話番号", "guest-phone", phone],
-      ["チェックイン日", "checkin", checkin],
-      ["チェックアウト日", "checkout", checkout],
-      ["お部屋", "room-choice", room],
-    ];
-    fields.forEach(([label, id, value]) => {
-      const error = document.getElementById(id + "-error").textContent;
-      console.log(`${label}：${value || "（未入力）"} → ${error || "OK"}`);
-    });
-    console.log(`ご要望など：${requests.value || "（未入力・任意）"}`);
-    console.log(`ご要望の文字数：${requests.value.length}/500 → ${requests.value.length <= 500 ? "OK" : "エラー"}`);
-    const hasError = fieldIds.some(id => document.getElementById(id).getAttribute("aria-invalid") === "true") || requests.value.length > 500;
-    console.log(`最終判定：${hasError ? "入力エラーあり" : "入力OK"}`);
-    console.groupEnd();
-    const firstInvalid = fieldIds.map(id => document.getElementById(id)).find(el => el.getAttribute("aria-invalid") === "true");
-    if (hasError) { if (firstInvalid) firstInvalid.focus(); return; }
-    // 入力チェックがすべてOKの場合のみサンクスページへ移動
-    const reservationData = {
-      guestName: name,
-      email,
-      phone,
-      checkin,
-      checkout,
-      room,
-      requests: requests.value.trim()
-    };
-    sessionStorage.setItem("nagiReservation", JSON.stringify(reservationData));
-    window.location.href = "thanks.html";
+
+    if (!email) {
+      setError("guest-email", "メールアドレスを入力してください。");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("guest-email", "正しいメールアドレスを入力してください。");
+    }
+
+    if (!phone) {
+      setError("guest-phone", "電話番号を入力してください。");
+    } else {
+      const digits = phone.replace(/-/g, "");
+
+      if (!/^0\d{9,10}$/.test(digits) ||
+          !/^[0-9-]+$/.test(phone)) {
+        setError(
+          "guest-phone",
+          "電話番号は数字とハイフンで10〜11桁の形式で入力してください。"
+        );
+      }
+    }
+
+    if (!checkin) {
+      setError("checkin", "チェックイン日を選択してください。");
+    }
+
+    if (!checkout) {
+      setError("checkout", "チェックアウト日を選択してください。");
+    } else if (checkin && checkout <= checkin) {
+      setError(
+        "checkout",
+        "チェックアウト日はチェックイン日より後の日付にしてください。"
+      );
+    }
+
+    if (!room) {
+      setError("room-choice", "お部屋を選択してください。");
+    }
+
+    if (!plan) {
+      setError("plan-choice", "宿泊プランを選択してください。");
+    }
+
+    if (requests.value.length > 500) {
+      feedback.textContent =
+        "ご要望は500文字以内で入力してください。";
+    }
+
+    const firstInvalid = fieldIds
+      .map((id) => document.getElementById(id))
+      .find((input) =>
+        input.getAttribute("aria-invalid") === "true"
+      );
+
+    const hasError =
+      Boolean(firstInvalid) || requests.value.length > 500;
+
+    if (hasError) {
+      // エラーがあれば送信しない
+      event.preventDefault();
+
+      if (firstInvalid) {
+        firstInvalid.focus();
+      }
+      return;
+    }
+
+    // 入力OKならHTMLの通常のフォーム送信を実行
+    // Spring BootのControllerが受け取る
   });
 }
-
-// APIから部屋タイプ一覧を取得する
-async function loadRoomTypes() {
-
-  const roomSelect = document.getElementById("room-choice");
-
-  try {
-    const response = await fetch("http://localhost:8081/api/room-types");
-
-    if (!response.ok) {
-      throw new Error("部屋タイプの取得に失敗しました");
-    }
-
-    const roomTypes = await response.json();
-
-    roomTypes.forEach((room) => {
-      const option = document.createElement("option");
-
-      option.value = room.id;
-      option.textContent = room.roomType;
-
-      roomSelect.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("APIエラー:", error);
-  }
-}
-
-loadRoomTypes();
-console.log("script.jsが読み込まれました");
-
-
-async function loadPlans() {
-  const planSelect = document.getElementById("plan-choice");
-
-  try {
-    const response = await fetch("/api/plans");
-
-    if (!response.ok) {
-      throw new Error("宿泊プランの取得に失敗しました");
-    }
-
-    const plans = await response.json();
-
-    plans.forEach((plan) => {
-      const option = document.createElement("option");
-      option.value = plan.id;
-      option.textContent = plan.stayPlan;
-      planSelect.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("プラン取得エラー:", error);
-  }
-}
-
-loadPlans();
-
-
-
+```

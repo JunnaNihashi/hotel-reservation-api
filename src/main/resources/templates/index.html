@@ -168,7 +168,12 @@
         <h2 id="reservation-title">Plan your stay.</h2>
         <p class="section-intro">ご希望の滞在日とお部屋をお知らせください。</p>
       </div>
-      <form class="reservation-form" id="reservation-form" novalidate>
+	  <form class="reservation-form"
+	        id="reservation-form"
+	        action="/reservations"
+	        method="post"
+	        novalidate>
+						
         <p class="form-required-note"><span class="required-mark">*</span> は必須項目です</p>
         <div class="form-field"><label for="guest-name">お名前 <span class="required-mark">*</span></label><input
             id="guest-name" name="guestName" type="text" autocomplete="name" required placeholder="お名前を入力してください">
@@ -193,24 +198,38 @@
             <p class="field-error" id="checkout-error"></p>
           </div>
         </div>
-
 		<div class="form-field">
-		  <label for="room-choice">お部屋 <span class="required-mark">*</span></label>
+		  <label for="room-choice">
+		    お部屋 <span class="required-mark">*</span>
+		  </label>
+
 		  <select id="room-choice" name="room" required>
 		    <option value="">選択してください</option>
+		    <option th:each="room : ${roomTypes}"
+		            th:value="${room.id}"
+		            th:text="${room.roomType}">
+		    </option>
 		  </select>
+
 		  <p class="field-error" id="room-choice-error"></p>
 		</div>
-
-		<!-- ここから宿泊プランの追加部分 -->
+		
 		<div class="form-field">
-		  <label for="plan-choice">宿泊プラン <span class="required-mark">*</span></label>
+		  <label for="plan-choice">
+		    宿泊プラン <span class="required-mark">*</span>
+		  </label>
+
 		  <select id="plan-choice" name="plan" required>
 		    <option value="">選択してください</option>
+		    <option th:each="plan : ${plans}"
+		            th:value="${plan.id}"
+		            th:text="${plan.stayPlan}">
+		    </option>
 		  </select>
+
 		  <p class="field-error" id="plan-choice-error"></p>
 		</div>
-
+		
         <div class="form-field"><label for="requests">ご要望など <span class="optional-mark">任意</span></label><textarea
             id="requests" name="requests" rows="5" maxlength="500" placeholder="ご要望があればご記入ください"></textarea>
           <p class="character-count"><span id="requests-count">0</span> / 500文字</p>

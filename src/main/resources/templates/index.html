@@ -430,23 +430,34 @@
 
 
 
+
 		  <select id="room-choice" name="roomTypeId" required>
 
-		    <option value="">選択してください</option>
+		      <!-- 最初の選択肢 -->
+		      <option value="">選択してください</option>
 
-		    <option th:each="room : ${roomTypes}"
-
-		            th:value="${room.id}"
-
-		            th:text="${room.roomType}">
-
-		    </option>
+		      <!-- DBから取得した部屋タイプを表示する -->
+		      <option th:each="room : ${roomTypes}"
+		              th:value="${room.id}"
+		              th:text="${room.roomType}"
+		              th:attr="data-capacity=${room.capacity}">
+		      </option>
 
 		  </select>
 
 
 
+
 		  <p class="field-error" id="room-choice-error"></p>
+		  
+
+		  <!--追加 空室確認の結果をお客様に表示する -->
+		  <p id="availability-message"
+		     role="status"
+		     aria-live="polite">
+		    宿泊日程を選択すると空室状況を確認できます。
+		  </p>
+
 
 		</div>
 
@@ -494,6 +505,8 @@
 		    <option value="2">2名</option>
 		    <option value="3">3名</option>
 		    <option value="4">4名</option>
+			<option value="5">5名</option>
+			<option value="6">6名</option>
 		  </select>
 
 		  <p class="field-error" id="number-of-guests-error"></p>
@@ -510,9 +523,14 @@
 
         </div>
 
-        <div class="form-actions"><button class="reservation-submit" type="submit">予約を送信する <span
-
-              aria-hidden="true">↗</span></button></div>
+        <div class="form-actions">
+			<button
+			  id="reservation-submit"
+			  class="reservation-submit"
+			  type="submit">
+			  予約を送信する
+			  <span aria-hidden="true">↗</span>
+			</button></div>
 
         <p class="form-feedback" id="form-feedback" role="status" aria-live="polite"></p>
 

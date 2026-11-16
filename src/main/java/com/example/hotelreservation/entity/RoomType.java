@@ -32,5 +32,14 @@ public class RoomType {
 	public Integer getPrice() {
 		return price;
 	}
+	
+	// 最大宿泊人数を保存するフィールド
+	@Column(name = "capacity")
+	private Integer capacity;
+
+	// 最大宿泊人数を取得するメソッド
+	public Integer getCapacity() {
+	    return capacity;
+	}
 
 }

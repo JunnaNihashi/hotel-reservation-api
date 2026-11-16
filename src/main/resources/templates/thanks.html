@@ -1,43 +1,226 @@
+
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ご予約ありがとうございます | THE NAGI VILLA</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/thanks.js" defer></script>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ご予約ありがとうございます | THE NAGI VILLA</title>
+
+    <!-- Google Fontsへの事前接続 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- フォントの読み込み -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&amp;family=Playfair+Display:wght@400;500&amp;display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- CSSの読み込み -->
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}"
+          href="/css/style.css">
 </head>
+
 <body>
-  <header class="site-header thanks-header">
-    <a class="logo" href="index.html" aria-label="THE NAGI VILLA ホーム">
-      <span class="logo-main">THE NAGI</span>
-      <span class="logo-sub">PRIVATE VILLA / OKINAWA</span>
-    </a>
-    <a class="thanks-header-link" href="index.html">BACK TO HOME ↗</a>
-  </header>
-  <main class="thanks-main">
-    <section class="thanks-container" aria-labelledby="thanks-title">
-      <p class="eyebrow">THANK YOU FOR YOUR RESERVATION</p>
-      <div id="thanks-success" hidden>
-        <div class="thanks-symbol" aria-hidden="true">✓</div>
-        <h1 id="thanks-title">ご予約ありがとうございます</h1>
-        <p class="thanks-lead">ご入力いただいたご予約内容をご確認ください。</p>
-        <div class="thanks-details">
-          <h2>RESERVATION DETAILS <span>ご予約内容</span></h2>
-          <dl id="reservation-details"></dl>
-        </div>
-        <p class="thanks-note">※こちらは学習用のデモサイトです。実際の予約は成立しておらず、情報の送信・サーバー保存も行われていません。</p>
-      </div>
-      <div id="thanks-empty" hidden>
-        <h1 id="empty-title">予約内容を確認できませんでした</h1>
-        <p class="thanks-lead">予約フォームから必要事項を入力してください。</p>
-      </div>
-      <a class="thanks-back" href="index.html">トップページへ戻る <span aria-hidden="true">↗</span></a>
-    </section>
-  </main>
-  <footer class="site-footer thanks-footer"><p>© 2026 THE NAGI VILLA. CONCEPT WEBSITE.</p></footer>
+
+    <!-- ===== ヘッダー ===== -->
+    <header class="site-header thanks-header">
+
+        <!-- 左上のロゴ -->
+        <a class="logo" th:href="@{/}" href="/"
+           aria-label="THE NAGI VILLA ホーム">
+
+            <span class="logo-main">THE NAGI</span>
+
+            <span class="logo-sub">PRIVATE VILLA / OKINAWA</span>
+        </a>
+
+        <!-- トップページへのリンク -->
+        <a class="thanks-header-link" th:href="@{/}" href="/">
+            BACK TO HOME ↗
+        </a>
+
+    </header>
+
+    <!-- ===== メインコンテンツ ===== -->
+    <main class="thanks-main">
+
+        <section class="thanks-container" aria-labelledby="thanks-title">
+
+            <p class="eyebrow">
+                THANK YOU FOR YOUR RESERVATION
+            </p>
+
+            <!-- ===== 予約情報が取得できた場合 ===== -->
+            <!-- Controllerからreservationが渡された場合だけ表示 -->
+            <div id="thanks-success" th:if="${reservation != null}">
+
+                <div class="thanks-symbol" aria-hidden="true">
+                    ✓
+                </div>
+
+                <h1 id="thanks-title">
+                    ご予約ありがとうございます
+                </h1>
+
+                <p class="thanks-lead">
+                    ご入力いただいたご予約内容をご確認ください。
+                </p>
+
+                <!-- ===== 予約内容 ===== -->
+                <div class="thanks-details">
+
+                    <h2>
+                        RESERVATION DETAILS
+                        <span>ご予約内容</span>
+                    </h2>
+
+                    <dl id="reservation-details">
+
+                        <!-- 予約番号 -->
+                        <div class="thanks-detail-row">
+                            <dt>予約番号</dt>
+                            <dd th:text="${reservation.id}">1</dd>
+                        </div>
+
+                        <!-- お名前 -->
+                        <div class="thanks-detail-row">
+                            <dt>お名前</dt>
+                            <dd th:text="${reservation.customer.name}">
+                                お名前
+                            </dd>
+                        </div>
+
+                        <!-- メールアドレス -->
+                        <div class="thanks-detail-row">
+                            <dt>メールアドレス</dt>
+                            <dd th:text="${reservation.customer.email}">
+                                example@email.com
+                            </dd>
+                        </div>
+
+                        <!-- 電話番号 -->
+                        <div class="thanks-detail-row">
+                            <dt>電話番号</dt>
+                            <dd th:text="${reservation.customer.phoneNumber}">
+                                09000000000
+                            </dd>
+                        </div>
+
+                        <!-- 住所 -->
+                        <div class="thanks-detail-row">
+                            <dt>住所</dt>
+                            <dd th:text="${reservation.customer.address}">
+                                住所
+                            </dd>
+                        </div>
+
+                        <!-- チェックイン日 -->
+                        <div class="thanks-detail-row">
+                            <dt>チェックイン日</dt>
+                            <dd th:text="${#temporals.format(reservation.checkInDate, 'yyyy/MM/dd')}">
+                                2026/11/16
+                            </dd>
+                        </div>
+
+                        <!-- チェックアウト日 -->
+                        <div class="thanks-detail-row">
+                            <dt>チェックアウト日</dt>
+                            <dd th:text="${#temporals.format(reservation.checkOutDate, 'yyyy/MM/dd')}">
+                                2026/11/17
+                            </dd>
+                        </div>
+
+                        <!-- お部屋タイプ -->
+                        <div class="thanks-detail-row">
+                            <dt>お部屋</dt>
+                            <dd th:text="${reservation.room.roomType.roomType}">
+                                THE HORIZON
+                            </dd>
+                        </div>
+
+                        <!-- 宿泊プラン -->
+                        <div class="thanks-detail-row">
+                            <dt>宿泊プラン</dt>
+                            <dd th:text="${reservation.plan.stayPlan}">
+                                素泊まり
+                            </dd>
+                        </div>
+
+                        <!-- 宿泊人数 -->
+                        <div class="thanks-detail-row">
+                            <dt>宿泊人数</dt>
+                            <dd th:text="|${reservation.numberOfGuests}名|">
+                                2名
+                            </dd>
+                        </div>
+
+                        <!-- 合計料金 -->
+                        <div class="thanks-detail-row">
+                            <dt>合計料金</dt>
+                            <dd th:text="|¥${#numbers.formatInteger(reservation.totalPrice, 1, 'COMMA')}|">
+                                ¥30,000
+                            </dd>
+                        </div>
+
+                        <!-- ご要望 -->
+                        <div class="thanks-detail-row">
+                            <dt>ご要望など</dt>
+                            <dd th:text="${#strings.isEmpty(reservation.requests) ? 'なし' : reservation.requests}">
+                                なし
+                            </dd>
+                        </div>
+
+                    </dl>
+
+                </div>
+
+                <!-- 学習用サイトであることの注意書き -->
+                <p class="thanks-note">
+                    ※こちらは学習用のデモサイトです。
+                    入力された予約情報は学習用データベースに保存されますが、
+                    実際の宿泊予約は成立しません。
+                </p>
+
+            </div>
+
+            <!-- ===== 予約情報が取得できなかった場合 ===== -->
+            <!-- Controllerからreservationが渡されなかった場合に表示 -->
+            <div id="thanks-empty" th:unless="${reservation != null}">
+
+                <h1 id="empty-title">
+                    予約内容を確認できませんでした
+                </h1>
+
+                <p class="thanks-lead">
+                    予約フォームから必要事項を入力してください。
+                </p>
+
+            </div>
+
+            <!-- トップページへ戻る -->
+            <a class="thanks-back" th:href="@{/}" href="/">
+                トップページへ戻る
+                <span aria-hidden="true">↗</span>
+            </a>
+
+        </section>
+
+    </main>
+
+    <!-- ===== フッター ===== -->
+    <footer class="site-footer thanks-footer">
+
+        <p>
+            © 2026 THE NAGI VILLA. CONCEPT WEBSITE.
+        </p>
+
+    </footer>
+
 </body>
 </html>

@@ -39,7 +39,6 @@ if (menuToggle && globalNav) {
 
     // リンクを押したらメニューを閉じる
     link.addEventListener("click", () => {
-
       menuToggle.setAttribute("aria-expanded", "false");
       menuToggle.setAttribute("aria-label", "メニューを開く");
       globalNav.classList.remove("is-open");
@@ -56,6 +55,10 @@ const reservationForm = document.querySelector("#reservation-form");
 
 // 予約フォームが存在する場合だけ実行
 if (reservationForm) {
+
+  // ブラウザ標準の入力チェックを無効にする
+  // JavaScriptでエラーメッセージを表示するため
+  reservationForm.noValidate = true;
 
   // 入力チェックを行う項目
   const fieldIds = [
@@ -136,7 +139,22 @@ if (reservationForm) {
     }
   }
 
-  // 入力内容が変更されたら通常のエラーを解除
+  // サーバー側で表示されたエラーを初期状態に反映
+  fieldIds.forEach((id) => {
+
+    // 入力欄を取得
+    const input = document.getElementById(id);
+
+    // エラー表示欄を取得
+    const error = document.getElementById(id + "-error");
+
+    // エラーメッセージが存在する場合
+    if (input && error && error.textContent.trim()) {
+      input.setAttribute("aria-invalid", "true");
+    }
+  });
+
+  // 入力内容が変更されたら、その項目のエラーを解除
   fieldIds.forEach((id) => {
 
     // 入力欄を取得
@@ -145,25 +163,47 @@ if (reservationForm) {
     // 存在しない場合はスキップ
     if (!input) return;
 
-    // 入力されたときにエラーを解除
-    input.addEventListener("input", () => setError(id, ""));
+    // 文字を入力した場合
+    input.addEventListener("input", () => {
+      setError(id, "");
+    });
 
-    // 選択が変更されたときも解除
-    input.addEventListener("change", () => setError(id, ""));
+    // 選択内容を変更した場合
+    input.addEventListener("change", () => {
+      setError(id, "");
+    });
   });
 
   // ========================================
   // 4. ご要望の文字数表示
   // ========================================
 
-  // ご要望欄と文字数表示が存在する場合
-  if (requests && count) {
+  // 文字数表示を更新する関数
+  function updateRequestCount() {
+
+    // 必要な要素が存在しなければ終了
+    if (!requests || !count) return;
+
+    // 現在の文字数を表示
+    count.textContent = requests.value.length;
+  }
+
+  // ご要望欄が存在する場合
+  if (requests) {
 
     // 入力するたびに文字数を更新
     requests.addEventListener("input", () => {
 
-      // 現在の文字数を表示
-      count.textContent = requests.value.length;
+      // 文字数を更新
+      updateRequestCount();
+
+      // ご要望のエラーを取得
+      const error = document.getElementById("requests-error");
+
+      // 入力内容が修正されたらエラーを解除
+      if (error) {
+        error.textContent = "";
+      }
     });
   }
 
@@ -203,10 +243,10 @@ if (reservationForm) {
     // 部屋または人数が未選択なら終了
     if (!roomSelect.value || !guestSelect.value) {
       setError("number-of-guests", "");
-      return;
+      return true;
     }
 
-    // 定員が取得できない場合はエラーを表示
+    // 定員が取得できない場合
     if (capacity === null) {
 
       setError(
@@ -214,7 +254,7 @@ if (reservationForm) {
         "お部屋の定員を確認できません。"
       );
 
-      return;
+      return false;
     }
 
     // 最大定員を超えている場合
@@ -226,33 +266,40 @@ if (reservationForm) {
         `選択されたお部屋の定員は${capacity}名です。宿泊人数を変更してください。`
       );
 
-    } else {
-
-      // 定員内であればエラーを解除
-      setError("number-of-guests", "");
+      return false;
     }
+
+    // 定員内であればエラーを解除
+    setError("number-of-guests", "");
+
+    return true;
   }
 
   // 部屋タイプに合わせて人数の状態を更新
   function updateGuestOptions() {
 
-    // 人数の選択肢をすべて選択可能にする
+    // すべての人数を選択できる状態にする
+    // 定員超過はエラーメッセージで知らせる
     Array.from(guestSelect.options).forEach((option) => {
       option.disabled = false;
     });
 
-    // 現在の宿泊人数が定員内か確認する
+    // 現在の宿泊人数をチェック
     validateGuestCapacity();
   }
 
-  // 部屋タイプが変更されたら人数を再チェック
-  roomSelect.addEventListener("change", updateGuestOptions);
+  // 部屋タイプを変更したとき
+  roomSelect.addEventListener("change", () => {
+    updateGuestOptions();
+  });
 
-  // 宿泊人数が変更されたら定員をチェック
-  guestSelect.addEventListener("change", validateGuestCapacity);
+  // 宿泊人数を変更したとき
+  guestSelect.addEventListener("change", () => {
+    validateGuestCapacity();
+  });
 
   // ========================================
-  // 6. 空室確認の表示
+  // 6. 空室確認
   // ========================================
 
   // 空室確認の状態とメッセージを更新
@@ -262,11 +309,13 @@ if (reservationForm) {
     availabilityConfirmed = confirmed;
 
     // メッセージを表示
-    availabilityMessage.textContent = message;
+    if (availabilityMessage) {
+      availabilityMessage.textContent = message;
+    }
 
     // 空室確認が終わるまで送信ボタンを無効化
     if (submitButton) {
-      submitButton.disabled = !confirmed;
+      submitButton.disabled = false;
     }
   }
 
@@ -303,21 +352,28 @@ if (reservationForm) {
         option.textContent.replace(/（満室）$/, "");
     });
 
-    // 日程が未入力なら終了
-    if (!checkIn || !checkOut) return;
+	// 日程が未入力なら終了
+	if (!checkIn || !checkOut) return;
 
-    // 日付の前後関係を確認
-    if (checkOut <= checkIn) {
+	// チェックアウト日のエラーを解除
+	setError("checkout", "");
 
-      updateAvailabilityMessage(
-        "チェックアウト日はチェックイン日より後にしてください。"
-      );
+	// 日付の前後関係を確認
+	if (checkOut <= checkIn) {
 
-      return;
-    }
+	  // チェックアウト日の下にエラーを表示
+	  setError(
+	    "checkout",
+	    "チェックアウト日はチェックイン日より後にしてください。"
+	  );
 
-    // 空室確認中のメッセージ
-    updateAvailabilityMessage("空室状況を確認しています...");
+	  // 日付が不正なので空室確認を終了
+	  return;
+	}
+
+	// 日付が正しい場合は空室確認を続ける
+	updateAvailabilityMessage("空室状況を確認しています...");
+	
 
     try {
 
@@ -410,7 +466,6 @@ if (reservationForm) {
 
       } else if (selectedRoomUnavailable) {
 
-        // 選択中の部屋が満室だった場合
         updateAvailabilityMessage(
           "選択されたお部屋は予約できません。別のお部屋または日程をお選びください。",
           true
@@ -418,7 +473,6 @@ if (reservationForm) {
 
       } else {
 
-        // 空室がある場合
         updateAvailabilityMessage(
           "空室状況を確認しました。ご希望のお部屋をお選びください。",
           true
@@ -453,7 +507,7 @@ if (reservationForm) {
   // 予約ボタンを押したとき
   reservationForm.addEventListener("submit", (event) => {
 
-    // 前回のエラーを消す
+    // 前回のフォーム全体のエラーを消す
     feedback.textContent = "";
 
     // 各項目のエラーを解除
@@ -478,7 +532,10 @@ if (reservationForm) {
     // メールアドレスの形式チェック
     if (!email) {
 
-      setError("guest-email", "メールアドレスを入力してください。");
+      setError(
+        "guest-email",
+        "メールアドレスを入力してください。"
+      );
 
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 
@@ -491,7 +548,10 @@ if (reservationForm) {
     // 電話番号の形式チェック
     if (!phone) {
 
-      setError("guest-phone", "電話番号を入力してください。");
+      setError(
+        "guest-phone",
+        "電話番号を入力してください。"
+      );
 
     } else {
 
@@ -521,7 +581,10 @@ if (reservationForm) {
     // チェックアウト日のチェック
     if (!checkout) {
 
-      setError("checkout", "チェックアウト日を選択してください。");
+      setError(
+        "checkout",
+        "チェックアウト日を選択してください。"
+      );
 
     } else if (checkin && checkout <= checkin) {
 
@@ -546,33 +609,16 @@ if (reservationForm) {
       setError("number-of-guests", "宿泊人数を選択してください。");
     }
 
-    // 選択中の部屋タイプの定員を取得
-    const capacity = getRoomCapacity();
-
-    // 定員超過をチェック
+    // 定員超過のチェック
     if (room && guests) {
-
-      // 定員が取得できなかった場合
-      if (capacity === null) {
-
-        setError(
-          "number-of-guests",
-          "お部屋の定員を確認できません。"
-        );
-
-      // 宿泊人数が定員を超えている場合
-      } else if (Number(guests) > capacity) {
-
-        setError(
-          "number-of-guests",
-          `選択されたお部屋の定員は${capacity}名です。宿泊人数を変更してください。`
-        );
-      }
+      validateGuestCapacity();
     }
 
     // ご要望の文字数チェック
-    if (requests.value.length > 500) {
-      feedback.textContent = "ご要望は500文字以内で入力してください。";
+    if (requests && requests.value.length > 500) {
+
+      feedback.textContent =
+        "ご要望は500文字以内で入力してください。";
     }
 
     // 最初にエラーがある入力欄を取得
@@ -584,13 +630,15 @@ if (reservationForm) {
 
     // 入力エラーがあるか確認
     const hasError =
-      Boolean(firstInvalid) || requests.value.length > 500;
+      Boolean(firstInvalid) ||
+      (requests && requests.value.length > 500);
 
     // 入力エラーがある場合は送信しない
     if (hasError) {
 
       event.preventDefault();
 
+      // 最初のエラー項目へ移動
       if (firstInvalid) {
         firstInvalid.focus();
       }
@@ -634,11 +682,59 @@ if (reservationForm) {
   // 8. 初期表示
   // ========================================
 
-  // 初期状態では空室未確認にする
-  updateAvailabilityMessage(
-    "宿泊日程を選択すると空室状況を確認できます。"
-  );
+  // ご要望の文字数を初期表示
+  updateRequestCount();
 
   // 初期状態の人数チェックを反映
-  updateGuestOptions();
+  // サーバー側のエラー表示を消さないように、
+  // 部屋と人数が両方選択されている場合だけ実行
+  if (roomSelect.value && guestSelect.value) {
+    validateGuestCapacity();
+  }
+
+  // 入力済みの日程がある場合は空室確認を実行
+  // サーバー側のエラーでフォームに戻った場合にも対応
+  if (checkinInput.value && checkoutInput.value) {
+
+    checkRoomAvailability();
+
+  } else {
+
+    // 日程が未入力なら空室未確認にする
+    updateAvailabilityMessage(
+      "宿泊日程を選択すると空室状況を確認できます。"
+    );
+  }
+  
+  // ========================================
+  // サーバー側のバリデーションエラー表示
+  // ========================================
+
+  // エラーメッセージが表示されている入力欄を探す
+  const serverErrorField = fieldIds
+    .map((id) => document.getElementById(id))
+    .find((input) => {
+      if (!input) return false;
+
+      // 対応するエラーメッセージ欄を取得
+      const error = document.getElementById(input.id + "-error");
+
+      // エラーメッセージが存在するか確認
+      return error && error.textContent.trim() !== "";
+    });
+
+  // サーバー側のエラーがある場合
+  if (serverErrorField) {
+
+    // エラーのある入力欄へスクロール
+    serverErrorField.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    // 入力欄をフォーカス
+    serverErrorField.focus({
+      preventScroll: true
+    });
+  }
 }

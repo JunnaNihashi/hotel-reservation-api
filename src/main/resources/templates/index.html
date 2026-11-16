@@ -338,203 +338,304 @@
 
       </div>
 
+
 	  <form class="reservation-form"
-
 	        id="reservation-form"
+	        th:action="@{/reservations}"
+	        action="/reservations"
+	        th:object="${reservationForm}"
+	        method="post">
+
+	      <!-- CSRF保護が有効な場合のトークン -->
+	      <input type="hidden"
+	             th:if="${_csrf != null}"
+	             th:name="${_csrf.parameterName}"
+	             th:value="${_csrf.token}">
+
+	      <!-- 必須項目の説明 -->
+	      <p class="form-required-note">
+	          <span class="required-mark">*</span> は必須項目です
+	      </p>
+
+	      <!-- ===== お名前 ===== -->
+	      <div class="form-field">
+
+	          <label for="guest-name">
+	              お名前 <span class="required-mark">*</span>
+	          </label>
+
+	          <input id="guest-name"
+	                 name="guestName"
+	                 type="text"
+	                 autocomplete="name"
+	                 required
+	                 placeholder="お名前を入力してください"
+	                 th:field="*{guestName}">
+
+	          <!-- JavaScriptとSpring Bootの両方のエラーを表示 -->
+	          <p class="field-error"
+	             id="guest-name-error"
+	             th:text="${#fields.hasErrors('guestName') ? #fields.errors('guestName')[0] : ''}"></p>
+
+	      </div>
+
+	      <!-- ===== メールアドレス ===== -->
+	      <div class="form-field">
+
+	          <label for="guest-email">
+	              メールアドレス <span class="required-mark">*</span>
+	          </label>
+
+	          <input id="guest-email"
+	                 name="email"
+	                 type="email"
+	                 autocomplete="email"
+	                 required
+	                 placeholder="example@email.com"
+	                 th:field="*{email}">
+
+	          <!-- メールアドレスのエラー表示 -->
+	          <p class="field-error"
+	             id="guest-email-error"
+	             th:text="${#fields.hasErrors('email') ? #fields.errors('email')[0] : ''}"></p>
+
+	      </div>
+
+	      <!-- ===== 電話番号 ===== -->
+	      <div class="form-field">
+
+	          <label for="guest-phone">
+	              電話番号 <span class="required-mark">*</span>
+	          </label>
+
+	          <input id="guest-phone"
+	                 name="phone"
+	                 type="text"
+	                 inputmode="tel"
+	                 autocomplete="tel"
+	                 required
+	                 placeholder="090-1234-5678"
+	                 th:field="*{phone}">
+
+	          <!-- 電話番号のエラー表示 -->
+	          <p class="field-error"
+	             id="guest-phone-error"
+	             th:text="${#fields.hasErrors('phone') ? #fields.errors('phone')[0] : ''}"></p>
+
+	      </div>
+
+	      <!-- ===== ご住所 ===== -->
+	      <div class="form-field">
+
+	          <label for="guest-address">
+	              ご住所 <span class="required-mark">*</span>
+	          </label>
+
+	          <input id="guest-address"
+	                 name="address"
+	                 type="text"
+	                 autocomplete="street-address"
+	                 required
+	                 placeholder="住所を入力してください"
+	                 th:field="*{address}">
+
+	          <!-- 住所のエラー表示 -->
+	          <p class="field-error"
+	             id="guest-address-error"
+	             th:text="${#fields.hasErrors('address') ? #fields.errors('address')[0] : ''}"></p>
 
-	        th:action="@{/reservations}" action="/reservations"
+	      </div>
 
-	        method="post"
+	      <!-- ===== 宿泊日程 ===== -->
+	      <div class="form-dates">
 
-	        >
+	          <!-- チェックイン日 -->
+	          <div class="form-field">
 
+	              <label for="checkin">
+	                  チェックイン日
+	                  <span class="required-mark">*</span>
+	              </label>
 
+	              <input id="checkin"
+	                     name="checkin"
+	                     type="date"
+	                     required
+	                     th:field="*{checkin}">
 
-        <!-- Spring SecurityでCSRF保護が有効な場合、送信に必要なトークンを追加 -->
-      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+	              <!-- チェックイン日のエラー表示 -->
+	              <p class="field-error"
+	                 id="checkin-error"
+	                 th:text="${#fields.hasErrors('checkin') ? #fields.errors('checkin')[0] : ''}"></p>
 
-      <p class="form-required-note"><span class="required-mark">*</span> は必須項目です</p>
+	          </div>
 
-        <div class="form-field"><label for="guest-name">お名前 <span class="required-mark">*</span></label><input
+	          <!-- チェックアウト日 -->
+	          <div class="form-field">
 
-            id="guest-name" name="guestName" type="text" autocomplete="name" required placeholder="お名前を入力してください">
+	              <label for="checkout">
+	                  チェックアウト日
+	                  <span class="required-mark">*</span>
+	              </label>
 
-          <p class="field-error" id="guest-name-error"></p>
+	              <input id="checkout"
+	                     name="checkout"
+	                     type="date"
+	                     required
+	                     th:field="*{checkout}">
 
-        </div>
+	              <!-- チェックアウト日のエラー表示 -->
+	              <p class="field-error"
+	                 id="checkout-error"
+	                 th:text="${#fields.hasErrors('checkout') ? #fields.errors('checkout')[0] : ''}"></p>
 
-        <div class="form-field"><label for="guest-email">メールアドレス <span class="required-mark">*</span></label><input
+	          </div>
 
-            id="guest-email" name="email" type="email" autocomplete="email" required placeholder="example@email.com">
+	      </div>
 
-          <p class="field-error" id="guest-email-error"></p>
+	      <!-- ===== お部屋 ===== -->
+	      <div class="form-field">
 
-        </div>
+	          <label for="room-choice">
+	              お部屋 <span class="required-mark">*</span>
+	          </label>
 
-        <div class="form-field"><label for="guest-phone">電話番号 <span class="required-mark">*</span></label><input
+	          <select id="room-choice"
+	                  name="roomTypeId"
+	                  required
+	                  th:field="*{roomTypeId}">
 
-            id="guest-phone" name="phone" type="text" inputmode="tel" autocomplete="tel" required
+	              <option value="">選択してください</option>
+
+	              <!-- DBから部屋タイプを取得 -->
+	              <option th:each="room : ${roomTypes}"
+	                      th:value="${room.id}"
+	                      th:text="${room.roomType}"
+	                      th:attr="data-capacity=${room.capacity}">
+	              </option>
 
-            placeholder="090-1234-5678">
+	          </select>
 
-          <p class="field-error" id="guest-phone-error"></p>
+	          <!-- お部屋のエラー表示 -->
+	          <p class="field-error"
+	             id="room-choice-error"
+	             th:text="${#fields.hasErrors('roomTypeId') ? #fields.errors('roomTypeId')[0] : ''}"></p>
 
-        </div>
-		
-		<div class="form-field">
+	          <!-- JavaScriptによる空室確認結果 -->
+	          <p id="availability-message"
+	             role="status"
+	             aria-live="polite">
+	              宿泊日程を選択すると空室状況を確認できます。
+	          </p>
 
-		  <label for="guest-address">
-		    ご住所 <span class="required-mark">*</span>
-		  </label>
+	      </div>
 
-		  <input
-		    id="guest-address"
-		    name="address"
-		    type="text"
-		    autocomplete="street-address"
-		    required
-		    placeholder="住所を入力してください"
-		  >
+	      <!-- ===== 宿泊プラン ===== -->
+	      <div class="form-field">
 
-		  <p class="field-error" id="guest-address-error"></p>
+	          <label for="plan-choice">
+	              宿泊プラン <span class="required-mark">*</span>
+	          </label>
 
-		</div>
+	          <select id="plan-choice"
+	                  name="plan"
+	                  required
+	                  th:field="*{plan}">
 
-        <div class="form-dates">
+	              <option value="">選択してください</option>
 
-          <div class="form-field"><label for="checkin">チェックイン日 <span class="required-mark">*</span></label><input
+	              <!-- DBから宿泊プランを取得 -->
+	              <option th:each="plan : ${plans}"
+	                      th:value="${plan.id}"
+	                      th:text="${plan.stayPlan}">
+	              </option>
 
-              id="checkin" name="checkin" type="date" required>
+	          </select>
 
-            <p class="field-error" id="checkin-error"></p>
+	          <!-- 宿泊プランのエラー表示 -->
+	          <p class="field-error"
+	             id="plan-choice-error"
+	             th:text="${#fields.hasErrors('plan') ? #fields.errors('plan')[0] : ''}"></p>
 
-          </div>
+	      </div>
 
-          <div class="form-field"><label for="checkout">チェックアウト日 <span class="required-mark">*</span></label><input
+	      <!-- ===== 宿泊人数 ===== -->
+	      <div class="form-field">
 
-              id="checkout" name="checkout" type="date" required>
+	          <label for="number-of-guests">
+	              宿泊人数 <span class="required-mark">*</span>
+	          </label>
 
-            <p class="field-error" id="checkout-error"></p>
+	          <select id="number-of-guests"
+	                  name="numberOfGuests"
+	                  required
+	                  th:field="*{numberOfGuests}">
 
-          </div>
+	              <option value="">選択してください</option>
+	              <option value="1">1名</option>
+	              <option value="2">2名</option>
+	              <option value="3">3名</option>
+	              <option value="4">4名</option>
+	              <option value="5">5名</option>
+	              <option value="6">6名</option>
 
-        </div>
+	          </select>
 
-		<div class="form-field">
+	          <!-- 宿泊人数のエラー表示 -->
+	          <p class="field-error"
+	             id="number-of-guests-error"
+	             th:text="${#fields.hasErrors('numberOfGuests') ? #fields.errors('numberOfGuests')[0] : ''}"></p>
 
-		  <label for="room-choice">
+	      </div>
 
-		    お部屋 <span class="required-mark">*</span>
+	      <!-- ===== ご要望 ===== -->
+	      <div class="form-field">
 
-		  </label>
+	          <label for="requests">
+	              ご要望など <span class="optional-mark">任意</span>
+	          </label>
 
+	          <textarea id="requests"
+	                    name="requests"
+	                    rows="5"
+	                    maxlength="500"
+	                    placeholder="ご要望があればご記入ください"
+	                    th:field="*{requests}"></textarea>
 
+	          <!-- 入力文字数の表示 -->
+	          <p class="character-count">
+	              <span id="requests-count">0</span> / 500文字
+	          </p>
 
+	          <!-- ご要望のエラー表示 -->
+	          <p class="field-error"
+	             id="requests-error"
+	             th:text="${#fields.hasErrors('requests') ? #fields.errors('requests')[0] : ''}"></p>
 
-		  <select id="room-choice" name="roomTypeId" required>
+	      </div>
 
-		      <!-- 最初の選択肢 -->
-		      <option value="">選択してください</option>
+	      <!-- ===== 予約送信ボタン ===== -->
+	      <div class="form-actions">
 
-		      <!-- DBから取得した部屋タイプを表示する -->
-		      <option th:each="room : ${roomTypes}"
-		              th:value="${room.id}"
-		              th:text="${room.roomType}"
-		              th:attr="data-capacity=${room.capacity}">
-		      </option>
+	          <button id="reservation-submit"
+	                  class="reservation-submit"
+	                  type="submit">
 
-		  </select>
+	              予約を送信する
+	              <span aria-hidden="true">↗</span>
 
+	          </button>
 
+	      </div>
 
+	      <!-- フォーム全体のエラーメッセージ -->
+	      <p class="form-feedback"
+	         id="form-feedback"
+	         role="status"
+	         aria-live="polite"></p>
 
-		  <p class="field-error" id="room-choice-error"></p>
-		  
+	  </form>
 
-		  <!--追加 空室確認の結果をお客様に表示する -->
-		  <p id="availability-message"
-		     role="status"
-		     aria-live="polite">
-		    宿泊日程を選択すると空室状況を確認できます。
-		  </p>
-
-
-		</div>
-
-
-
-		<div class="form-field">
-
-		  <label for="plan-choice">
-
-		    宿泊プラン <span class="required-mark">*</span>
-
-		  </label>
-
-
-
-		  <select id="plan-choice" name="plan" required>
-
-		    <option value="">選択してください</option>
-
-		    <option th:each="plan : ${plans}"
-
-		            th:value="${plan.id}"
-
-		            th:text="${plan.stayPlan}">
-
-		    </option>
-
-		  </select>
-
-
-
-		  <p class="field-error" id="plan-choice-error"></p>
-
-		</div>
-		
-		<div class="form-field">
-
-		  <label for="number-of-guests">
-		    宿泊人数 <span class="required-mark">*</span>
-		  </label>
-
-		  <select id="number-of-guests" name="numberOfGuests" required>
-		    <option value="">選択してください</option>
-		    <option value="1">1名</option>
-		    <option value="2">2名</option>
-		    <option value="3">3名</option>
-		    <option value="4">4名</option>
-			<option value="5">5名</option>
-			<option value="6">6名</option>
-		  </select>
-
-		  <p class="field-error" id="number-of-guests-error"></p>
-
-		</div>
-
-
-
-        <div class="form-field"><label for="requests">ご要望など <span class="optional-mark">任意</span></label><textarea
-
-            id="requests" name="requests" rows="5" maxlength="500" placeholder="ご要望があればご記入ください"></textarea>
-
-          <p class="character-count"><span id="requests-count">0</span> / 500文字</p>
-
-        </div>
-
-        <div class="form-actions">
-			<button
-			  id="reservation-submit"
-			  class="reservation-submit"
-			  type="submit">
-			  予約を送信する
-			  <span aria-hidden="true">↗</span>
-			</button></div>
-
-        <p class="form-feedback" id="form-feedback" role="status" aria-live="polite"></p>
-
-      </form>
 
     </section>
 

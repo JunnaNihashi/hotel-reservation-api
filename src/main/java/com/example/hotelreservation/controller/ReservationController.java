@@ -8,12 +8,17 @@ import java.util.List;
 // JSONのデータを組み立てる
 import java.util.Map;
 
+//フォームのバリデーションを実行する
+import jakarta.validation.Valid;
+
 // 日付パラメータをLocalDateに変換する
 import org.springframework.format.annotation.DateTimeFormat;
 // Controllerとして登録する
 import org.springframework.stereotype.Controller;
 // HTMLへデータを渡す
 import org.springframework.ui.Model;
+//バリデーション結果を受け取る
+import org.springframework.validation.BindingResult;
 // GETリクエストを受け取る
 import org.springframework.web.bind.annotation.GetMapping;
 // フォームの情報を受け取る
@@ -69,9 +74,16 @@ public class ReservationController {
 
     // ===== 予約画面の表示 =====
 
+
     // GET / でトップページを表示する
     @GetMapping("/")
     public String showPage(Model model) {
+
+        // 予約フォーム用の空のオブジェクトを作成してHTMLへ渡す
+        model.addAttribute(
+                "reservationForm",
+                new ReservationForm()
+        );
 
         // DBから部屋タイプ一覧を取得してHTMLへ渡す
         model.addAttribute(
@@ -89,27 +101,88 @@ public class ReservationController {
         return "index";
     }
 
+
     // ===== 予約フォームの送信 =====
 
-    // POST /reservations を受け取る
-    @PostMapping("/reservations")
-    public String saveReservation(
-            @ModelAttribute ReservationForm form,
-            RedirectAttributes redirectAttributes) {
 
-        // フォームの情報をServiceへ渡し、DBに予約を登録する
-        Reservation reservation =
-                reservationService.createReservation(form);
 
-        // 保存した予約のIDをリダイレクト先へ一時的に渡す
-        redirectAttributes.addFlashAttribute(
-                "reservationId",
-                reservation.getId()
-        );
+@PostMapping("/reservations")
+public String saveReservation(
+        // 入力値を受け取り、アノテーションによる検証を実行
+        @Valid @ModelAttribute("reservationForm") ReservationForm form,
 
-        // 予約登録が成功した場合のみ完了画面へ移動する
-        return "redirect:/thanks";
+        // 入力エラーを管理
+        BindingResult bindingResult,
+
+        // HTMLに必要なデータを渡す
+        Model model,
+
+        // 予約成功時の情報を渡す
+        RedirectAttributes redirectAttributes) {
+
+    // チェックイン日とチェックアウト日が入力されている場合
+    if (form.getCheckin() != null && form.getCheckout() != null) {
+
+        // チェックアウト日がチェックイン日より後でない場合
+        if (!form.getCheckout().isAfter(form.getCheckin())) {
+
+            // チェックアウト日の入力エラーとして登録
+            bindingResult.rejectValue(
+                    "checkout",
+                    "invalidDate",
+                    "チェックアウト日はチェックイン日より後にしてください。"
+            );
+        }
     }
+
+    // 部屋タイプと宿泊人数が入力されている場合
+    if (form.getRoomTypeId() != null && form.getNumberOfGuests() != null) {
+
+        try {
+            // Serviceの定員チェックを実行
+            reservationService.validateGuests(
+                    form.getRoomTypeId(),
+                    form.getNumberOfGuests()
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            // 宿泊人数の入力エラーとして登録
+            bindingResult.rejectValue(
+                    "numberOfGuests",
+                    "invalidGuests",
+                    e.getMessage()
+            );
+        }
+    }
+
+    // 入力エラーがある場合
+    if (bindingResult.hasErrors()) {
+
+        // 部屋タイプの選択肢を再取得
+        model.addAttribute("roomTypes", roomTypeRepository.findAll());
+
+        // 宿泊プランの選択肢を再取得
+        model.addAttribute("plans", planRepository.findAll());
+
+        // 入力画面を再表示
+        return "index";
+    }
+
+    // 入力内容に問題がなければ予約を登録
+    Reservation reservation = reservationService.createReservation(form);
+
+    // 予約IDを完了画面に渡す
+    redirectAttributes.addFlashAttribute(
+            "reservationId",
+            reservation.getId()
+    );
+
+    // 予約完了画面へ移動
+    return "redirect:/thanks";
+}
+
+
 
 
     // ===== 予約完了画面の表示 =====

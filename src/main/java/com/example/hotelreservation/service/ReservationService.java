@@ -58,7 +58,13 @@ public class ReservationService {
         if (checkInDate == null || checkOutDate == null) {
             throw new IllegalArgumentException("宿泊日を入力してください");
         }
+     // チェックイン日が過去の日付か確認
+        if (checkInDate.isBefore(LocalDate.now())) {
 
+            // 過去の日付の場合は例外を発生させる
+            throw new IllegalArgumentException("過去の日付では予約できません");
+
+        }
         // チェックアウト日がチェックイン日より後か確認
         if (!checkOutDate.isAfter(checkInDate)) {
             throw new IllegalArgumentException("宿泊日を正しく指定してください");
@@ -212,26 +218,41 @@ public class ReservationService {
                 guests,
                 nights);
 
-        // ===== 顧客情報の登録 =====
+     // ===== 顧客情報の取得・登録 =====
 
-        // 新しいCustomerインスタンスを作成
-        Customer customer = new Customer();
+     // 名前・電話番号・メールアドレスが一致する顧客を検索
+     Customer customer = customerRepository
+             .findByNameAndPhoneNumberAndEmail(
+                     form.getGuestName(),
+                     form.getPhone(),
+                     form.getEmail()
+             )
 
-        // フォームのお名前をCustomerに設定
-        customer.setName(form.getGuestName());
+             // 既存顧客が見つからない場合だけ新しく作成する
+             .orElseGet(() -> {
 
-        // フォームの電話番号をCustomerに設定
-        customer.setPhoneNumber(form.getPhone());
+                 // 新しい顧客インスタンスを作成
+                 Customer newCustomer = new Customer();
 
-        // フォームのメールアドレスをCustomerに設定
-        customer.setEmail(form.getEmail());
+                 // フォームの名前を設定
+                 newCustomer.setName(form.getGuestName());
 
-        // フォームの住所をCustomerに設定
-        customer.setAddress(form.getAddress());
+                 // フォームの電話番号を設定
+                 newCustomer.setPhoneNumber(form.getPhone());
 
-        // DBのcustomersテーブルに顧客情報を保存
-        // 保存後のCustomerには自動採番されたIDが設定される
-        Customer savedCustomer = customerRepository.save(customer);
+                 // フォームのメールアドレスを設定
+                 newCustomer.setEmail(form.getEmail());
+
+                 // フォームの住所を設定
+                 newCustomer.setAddress(form.getAddress());
+
+                 // 新しい顧客をDBに保存して返す
+                 return customerRepository.save(newCustomer);
+
+             });
+
+     // 既存顧客または新規登録した顧客を予約に使用
+     Customer savedCustomer = customer;
 
         // ===== 予約情報の登録 =====
 

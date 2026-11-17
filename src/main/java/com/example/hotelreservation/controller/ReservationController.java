@@ -119,6 +119,21 @@ public String saveReservation(
 
         // 予約成功時の情報を渡す
         RedirectAttributes redirectAttributes) {
+	
+	// チェックイン日が入力されている場合
+	if (form.getCheckin() != null) {
+
+	    // チェックイン日が今日より前か確認
+	    if (form.getCheckin().isBefore(LocalDate.now())) {
+
+	        // チェックイン日の入力エラーとして登録
+	        bindingResult.rejectValue(
+	                "checkin",
+	                "pastDate",
+	                "過去の日付は選択できません。"
+	        );
+	    }
+	}
 
     // チェックイン日とチェックアウト日が入力されている場合
     if (form.getCheckin() != null && form.getCheckout() != null) {

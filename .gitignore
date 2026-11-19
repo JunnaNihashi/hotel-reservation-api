@@ -35,3 +35,11 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# 環境変数（パスワードなど）をGit管理から除外
+.env
+.env.*
+!.env.example
+
+# ローカル検証用Docker Compose
+docker-compose.test.yml
